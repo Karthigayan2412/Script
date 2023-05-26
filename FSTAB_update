@@ -1,0 +1,20 @@
+#!/bin/bash
+
+mount_output=$(mount)
+
+while read -r line; do
+    if [[ $line == *"type nfs"* ]]; then
+        device=$(echo "$line" | awk '{print $1}')
+        mount_point=$(echo "$line" | awk '{print $3}')
+        options=$(echo "$line" | awk '{print $6}')
+
+        # Generate the fstab entry
+        fstab_entry="$device $mount_point nfs vers=3 0 0"
+
+        # Append the fstab entry to /etc/fstab
+        echo "$fstab_entry" | sudo tee -a /etc/fstab
+        echo "Added the following fstab entry for NFS:"
+        echo "$fstab_entry"
+        echo
+    fi
+done <<< "$mount_output"
